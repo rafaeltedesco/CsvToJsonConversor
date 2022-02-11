@@ -1,29 +1,29 @@
 import express from 'express'
 import 'dotenv/config'
-import { readFile } from 'fs/promises'
+import { createReadStream } from 'fs'
 import path from 'path'
 
 const app = express()
 
 app.use('/', async (req, res, next)=> {
   try {
-    const csv = await readFile(global.filename, {encoding: 'utf-8'})
+    const csvStream = createReadStream(global.filename, {encoding: 'utf-8'})
  
-    let data = csv.split('\n')
-    const header = data[0].split(',')
-    const lines = data.slice(1).map(line => line.split(','))
-    let jsonData = []
-   
-    for (let line of lines) {
-      let row = {}
-      for (let colIdx in header) {
-        let col = header[colIdx]
-        let cellValue = line[colIdx]
-        row[col] = cellValue
+    csvStream.on('data', (chunk)=> {
+      let data = chunk.split('\n')
+      const header = data[0].split(',')
+      const lines = data.slice(1).map(line => line.split(','))
+      
+      for (let line of lines) {
+        let row = {}
+        for (let colIdx in header) {
+          let col = header[colIdx]
+          let cellValue = line[colIdx]
+          row[col] = cellValue
+        }
+        res.write(JSON.stringify(row))
       }
-      jsonData.push(row)
-    }
-   res.end(JSON.stringify(jsonData))
+    })
   }
   catch(err) {
     console.error(err.message)
