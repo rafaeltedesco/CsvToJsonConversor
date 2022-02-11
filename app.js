@@ -21,16 +21,18 @@ app.use('/', async (req, res, next)=> {
           let cellValue = line[colIdx]
           row[col] = cellValue
         }
+       
         res.write(JSON.stringify(row))
       }
     })
-    
-    csvStream.on('error', (err)=> {
-      res.end(err.message)
+
+    csvStream.on('end', ()=> {
+      res.end()
+
     })
 
-    csvStream.on('finish', ()=> {
-      res.end()
+    csvStream.on('error', (err)=> {
+      res.end(err.message)
     })
 })
 
