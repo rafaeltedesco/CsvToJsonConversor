@@ -31,7 +31,7 @@ app.use('/', async (req, res, next)=> {
 
     csvStream.on('finish', ()=> {
       res.end()
-    }
+    })
 })
 
 global.__dirname = process.cwd()
