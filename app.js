@@ -6,7 +6,7 @@ import path from 'path'
 const app = express()
 
 app.use('/', async (req, res, next)=> {
-  try {
+  
     const csvStream = createReadStream(global.filename, {encoding: 'utf-8'})
  
     csvStream.on('data', (chunk)=> {
@@ -24,12 +24,14 @@ app.use('/', async (req, res, next)=> {
         res.write(JSON.stringify(row))
       }
     })
-  }
-  catch(err) {
-    console.error(err.message)
-    throw new Error('Error reading file')
-  }
-  
+    
+    csvStream.on('error', (err)=> {
+      res.end(err.message)
+    })
+
+    csvStream.on('finish', ()=> {
+      res.end()
+    }
 })
 
 global.__dirname = process.cwd()
